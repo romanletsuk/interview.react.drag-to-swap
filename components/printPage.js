@@ -1,5 +1,10 @@
 import styled from "styled-components";
 import Actions from "./actions";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import PrintPhoto from "./printPhoto";
+import CustomDragLayer from "./customDragLayer";
+import { useImageStorage } from "../contexts/ImageStorageContext";
 
 const Wrapper = styled.div`
   width: 600px;
@@ -32,17 +37,12 @@ const PageLayout = styled.div`
   justify-content: space-between;
 `;
 
-const PrintPhoto = styled.div`
-  width: calc(50% - 10px);
+export default function PrintPage() {
+  const { data } = useImageStorage();
 
-  img {
-    max-width: 100%;
-  }
-`;
-
-export default function PrintPage({ data }) {
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
+      <CustomDragLayer />
       <Wrapper>
         {Object.values(data).map((entry, i) => {
           return (
@@ -52,18 +52,19 @@ export default function PrintPage({ data }) {
                 <Actions />
               </Header>
               <PageLayout>
-                {entry.images.map((image) => {
-                  return (
-                    <PrintPhoto key={image}>
-                      <img src={image} alt="" />
-                    </PrintPhoto>
-                  );
-                })}
+                {entry.images.map((image, index) => (
+                    <PrintPhoto
+                      key={index}
+                      blockIndex={i}
+                      index={index}
+                      image={image}
+                    />
+                ))}
               </PageLayout>
             </PrintWrapper>
           );
         })}
       </Wrapper>
-    </>
+    </DndProvider>
   );
 }
